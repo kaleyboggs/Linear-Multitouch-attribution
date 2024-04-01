@@ -1,0 +1,55 @@
+#Credit= weights i.e. credit to different touch points- based on performance)
+
+class MultitouchAttributionModel:
+def __init__(self, touchpoints, weights=None):
+        """
+     multitouch attribution model.
+      parameter ouchpoints: List of touchpoints in the customer journey.
+         weights:  specify weights for each touchpoint, if an equal weights are used.
+        """
+        self.touchpoints = touchpoints
+        if weights:
+            self.weights = weights
+        else:
+            # Assign equal weights if not specified
+            self.weights = {tp: 1.0 for tp in touchpoints}
+
+    def assign_credit(self, journey):
+        """
+        Assign credit to touchpoints in the customer journey.
+
+        :param journey: List representing the customer journey.
+        :return: Dictionary containing touchpoints and their corresponding credits.
+        """
+        credits = {tp: 0.0 for tp in self.touchpoints}
+        total_weight = sum(self.weights.values())
+
+        for i, touchpoint in enumerate(journey):
+            remaining_weight = total_weight
+            for j in range(i, -1, -1):
+                current_weight = self.weights[journey[j]]
+                credits[journey[j]] += (current_weight / remaining_weight)
+                remaining_weight -= current_weight
+
+        return credits
+
+
+# Example usage
+if __name__ == "__main__":
+    # Define touchpoints and their weights, if weight isn't specified it should just give equal wieght. This weighting doesn't have a method, need to add for testing. See weighting methods
+    touchpoints = ["Ad", "Social Media", "Email", "Website"]
+    weights = {"Ad": 1, "Social Media": 2, "Email": 3, "Website": 4}
+
+    # Initialize the model
+    model = MultitouchAttributionModel(touchpoints, weights)
+
+    # Example customer journey
+    customer_journey = ["Ad", "Social Media", "Email", "Website"]
+
+    # Assign credit to touchpoints
+    credits = model.assign_credit(customer_journey)
+
+    # Print credits assigned to each touchpoint
+    print("Multitouch Attribution Credits:")
+    for touchpoint, credit in credits.items():
+        print(f"{touchpoint}: {credit:.2f}")
